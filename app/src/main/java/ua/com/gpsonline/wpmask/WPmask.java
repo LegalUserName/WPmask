@@ -34,11 +34,11 @@ public class WPmask extends LinearLayout implements WPmask_eCountriesAdapter.OnS
     private Context context;
     String PhoneNumber= "";
 
-    public static ImageView Flag;
+    public ImageView Flag;
     private LinearLayout Delimetr;
-    public  EditText PhoneNumberView;
-    public static TextView PhoneCode;
-    public static String PhoneNumberValueBefore;
+    public EditText PhoneNumberView;
+    public TextView PhoneCode;
+    public String PhoneNumberValueBefore="";
 
     private float scale;
     public static FrameLayout FrameMenuCountry;
@@ -49,7 +49,7 @@ public class WPmask extends LinearLayout implements WPmask_eCountriesAdapter.OnS
     private RecyclerView MenuCountry_list;
     private WPmask_eCountriesAdapter mWPmask_eCountriesAdapter;
     private View rootView;
-    public static WPmask_eCountries wp_eCountries =new WPmask_eCountries("ua", "380", 12, "ua_flag", "Ukraine (Україна)", "XX XXX-XX-XX");
+    public final WPmask_eCountries wp_eCountries =new WPmask_eCountries("ua", "380", 12, "ua_flag", "Ukraine (Україна)", "XX XXX-XX-XX");
 
     HashMap<String,String> PlaceHolders = new HashMap();
 
@@ -57,22 +57,38 @@ public class WPmask extends LinearLayout implements WPmask_eCountriesAdapter.OnS
         super(context, attrs);
         this.context=context;
         rootView = ((Activity)context). getWindow().getDecorView().getRootView();
-        mWPmask_eCountriesAdapter=new WPmask_eCountriesAdapter(context,wp_eCountries.getArr());
+        mWPmask_eCountriesAdapter=new WPmask_eCountriesAdapter(context,wp_eCountries.getCountries());
         mWPmask_eCountriesAdapter.Register_onSetCounty(this);
 
         this.scale = context.getResources().getDisplayMetrics().density;
         TypedArray attributes = context.obtainStyledAttributes(attrs, R.styleable.WPmask);
-        String CurrentCountry_tmp = attributes.getString(R.styleable.WPmask_android_country);
-        String PhoneNumber_tmp = attributes.getString(R.styleable.WPmask_android_phoneNumber);
+        String CurrentCountry_tmp = attributes.getString(R.styleable.WPmask_country);
+
+        String PhoneNumber_tmp="";
+        try {
+            PhoneNumber_tmp = attributes.getString(R.styleable.WPmask_phoneNumber);
+        }finally {
+            //Log.v("###1",PhoneNumber_tmp);
+        }
 
         if (PhoneNumber_tmp != null) {
             PhoneNumber = PhoneNumber_tmp;
+            Log.v("###",PhoneNumber);
+            if(InitNumber(PhoneNumber)){
+                String numberWithOutCode = PhoneNumber.substring(wp_eCountries.code.length(),PhoneNumber.length());
+                CreateElements(PhoneNumber.substring(wp_eCountries.code.length()+1,PhoneNumber.length()));
+            }else{
+                CreateElements("");
+            }
+        }else {
+            CreateElements("");
         }
         attributes.recycle();
-        CreateElements();
     }
 
-    private void CreateElements(){
+    private void CreateElements(String Number){
+        Log.v("###","CreateElements"+Number);
+
         Flag = new ImageView(this.context);
         //RowDown = new ImageView(this.context);
         Delimetr = new LinearLayout(this.context);
@@ -102,7 +118,11 @@ public class WPmask extends LinearLayout implements WPmask_eCountriesAdapter.OnS
         PhoneCode.setGravity(Gravity.CENTER | Gravity.LEFT);
         PhoneNumberView.setGravity(Gravity.CENTER);
         FrameMenuCountry.setLayoutParams(MenuCountryParams);
-        PhoneNumberView.setText(wp_eCountries.pattern);
+        if(Number.length() >0 ){
+            PhoneNumberView.setText(Number);
+        }else {
+            PhoneNumberView.setHint(wp_eCountries.pattern);
+        }
         PhoneCode.setText("+"+wp_eCountries.code);
 
         Delimetr.setBackgroundColor(Color.LTGRAY);
@@ -188,21 +208,47 @@ public class WPmask extends LinearLayout implements WPmask_eCountriesAdapter.OnS
         FrameMenuCountry.addView(MenuCountry_box);
         MenuCountry_box.addView(MenuCountry_list);
         MenuCountry_box.addView(MenuCountry_bottom);
+        if(Number.length() > 0){
+            update(PhoneNumberView);
+        }
+    }
 
+    public boolean InitNumber(String number){
+        Log.v("###","InitNumber");
+
+        Boolean result =false;
+        number = number.replaceAll("\\D","");
+        Log.v("###","InitNumber:"+number);
+
+        ArrayList<WPmask_eCountries> countries = wp_eCountries.getCountries();
+        for(WPmask_eCountries country : countries){
+            if(number.substring(0,country.code.length()).equals(country.code)){
+                Log.v("###","set_country:"+country.shortName);
+                wp_eCountries.setCountry(country.shortName);
+                result = true;
+                break;
+            }
+        }
+        return  result;
     }
     public  String getNumber(){
         return wp_eCountries.code+PhoneNumberView.getText().toString().replaceAll("\\D","");
     }
+    public  void setNumber(String number){
+        InitNumber(number);
+    }
     public  Boolean isValid(){
         return  (this.getNumber().length() == this.wp_eCountries.len) ? true :false;
     }
-    public static String getCountryShortName(){
+    public String getCountryShortName(){
         return wp_eCountries.shortName;
     }
-    public static void UpdateElements(){
+    public void UpdateElements(){
         PhoneCode.setText("+"+wp_eCountries.code);
         Flag.setImageBitmap(wp_eCountries.flagBitmap);
         FrameMenuCountry.setVisibility(GONE);
+        PhoneNumberView.setHint(wp_eCountries.pattern);
+        update(PhoneNumberView);
     }
     public static Bitmap decodeBase64(String input) {
         byte[] decodedByte = Base64.decode(input, 0);
@@ -214,14 +260,16 @@ public class WPmask extends LinearLayout implements WPmask_eCountriesAdapter.OnS
 
     @Override
     public void onSetCounty(int position) {
-        wp_eCountries =  WPmask_eCountries.getArr().get(position);
-        WPmask.UpdateElements();
+        WPmask_eCountries country = wp_eCountries.getCountries().get(position);
+        wp_eCountries.setCountry(country.shortName);
+        //wp_eCountries =  wp_eCountries.getCountries().get(position);
+        //wp_eCountries =  WPmask_eCountries.getCountries().get(position);
+        this.UpdateElements();
     }
-    public static void update(final EditText view){
+    public void update(final EditText view){
         view.clearFocus();
         String str = view.getText().toString().replaceAll("\\D","");
         Integer k=0;
-        Integer z=0;
         if(PhoneNumberValueBefore.length() > view.getText().toString().length()){
             if(PhoneNumberValueBefore.replaceAll("\\D","").length() <= str.length()){
                 str = str.substring(0,str.length()-1);
@@ -229,8 +277,8 @@ public class WPmask extends LinearLayout implements WPmask_eCountriesAdapter.OnS
         }
 
         String res=""  ;
-        for(Integer i=0;i< WPmask.wp_eCountries.pattern.length();i++){
-            if(WPmask.wp_eCountries.pattern.charAt(i) == 'X'){
+        for(Integer i = 0; i< wp_eCountries.pattern.length(); i++){
+            if(wp_eCountries.pattern.charAt(i) == 'X'){
                 if(str.length() > k){
                     res += str.charAt(k);
                     k++;
@@ -238,7 +286,7 @@ public class WPmask extends LinearLayout implements WPmask_eCountriesAdapter.OnS
                     break;
                 }
             }else{
-                res+=WPmask.wp_eCountries.pattern.charAt(i);
+                res+= wp_eCountries.pattern.charAt(i);
             }
         }
         view.setText(res);
@@ -265,7 +313,7 @@ class WPmask_eCountries{
         this.pattern = pattern;
         this.flagBitmap= getCountryBitmap(this.shortName);
     }
-    public static ArrayList<WPmask_eCountries> getArr(){
+    public ArrayList<WPmask_eCountries> getCountries(){
         ArrayList<WPmask_eCountries> arr = new ArrayList<>();
         arr.add(new WPmask_eCountries("ua", "380", 12, "ua_flag", "Ukraine (Україна)", "XX XXX-XX-XX"));
         arr.add(new WPmask_eCountries("bl", "375", 12, "bl_flag", "Belarus (Беларусь)", "XX XXX-XX-XX"));
@@ -295,6 +343,22 @@ class WPmask_eCountries{
         byte[] decodedByte = Base64.decode(input, 0);
         return BitmapFactory.decodeByteArray(decodedByte, 0, decodedByte.length);
     }
+    public void setCountry(String ShortName){
+        ArrayList<WPmask_eCountries> countries = this.getCountries();
+        for(WPmask_eCountries country : countries){
+            if(country.shortName.equals(ShortName)){
+                this.imageStr = country.imageStr;
+                this.code = country.code;
+                this.shortName = country.shortName;
+                this.len = country.len;
+                this.name = country.name;
+                this.pattern = country.pattern;
+                this.flagBitmap= WPmask_eCountries.getCountryBitmap(country.shortName);
+                break;
+            }
+        }
+    }
+
 }
 class WPmask_eCountriesAdapter extends RecyclerView.Adapter<WPmask_eCountriesAdapter.RecViewHolder> {
     private Context mContext;
@@ -313,26 +377,26 @@ class WPmask_eCountriesAdapter extends RecyclerView.Adapter<WPmask_eCountriesAda
         mCountries = countries;
 
     }
-    public OnSetCounty onSetCounty;
-    public void Register_onSetCounty(OnSetCounty onSetCounty){ this.onSetCounty = onSetCounty; }
+    public WPmask_eCountriesAdapter.OnSetCounty onSetCounty;
+    public void Register_onSetCounty(WPmask_eCountriesAdapter.OnSetCounty onSetCounty){ this.onSetCounty = onSetCounty; }
     public interface OnSetCounty{ void onSetCounty(int position);}
 
     @NonNull
     @Override
-    public RecViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int i) {
+    public WPmask_eCountriesAdapter.RecViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int i) {
         MenuCountry_item = new LinearLayout(mContext);
         MenuCountry_item.setOrientation(LinearLayout.HORIZONTAL);
-        MenuCountry_item.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,WPmask.get_pixels(mContext,50)));
+        MenuCountry_item.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, WPmask.get_pixels(mContext,50)));
         MenuCountry_item.setGravity(Gravity.CENTER);
 
         MenuCountry_row = new LinearLayout(mContext);
         MenuCountry_row.setOrientation(LinearLayout.VERTICAL);
-        MenuCountry_row.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,WPmask.get_pixels(mContext,50)));
+        MenuCountry_row.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, WPmask.get_pixels(mContext,50)));
         MenuCountry_row.setGravity(Gravity.CENTER);
 
         MenuCountry_border = new LinearLayout(mContext);
         MenuCountry_border.setOrientation(LinearLayout.VERTICAL);
-        MenuCountry_border.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,WPmask.get_pixels(mContext,3)));
+        MenuCountry_border.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, WPmask.get_pixels(mContext,3)));
         MenuCountry_border.setBackgroundColor(Color.BLACK);
 
         MenuCountry_item_flag = new ImageView(mContext);
