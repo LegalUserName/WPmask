@@ -1,4 +1,4 @@
-package ua.com.gpsonline.wpmask;
+package wpmask;
 
 import android.app.Activity;
 import android.content.Context;

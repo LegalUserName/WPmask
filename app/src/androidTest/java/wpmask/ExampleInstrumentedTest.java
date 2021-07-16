@@ -1,4 +1,4 @@
-package ua.com.gpsonline.wpmask;
+package wpmask;
 
 import android.content.Context;
 
@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
     public void useAppContext() {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
-        assertEquals("ua.com.gpsonline.wpmask", appContext.getPackageName());
+        assertEquals("wpmask", appContext.getPackageName());
     }
 }
