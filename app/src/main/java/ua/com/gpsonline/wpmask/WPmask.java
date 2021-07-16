@@ -28,30 +28,28 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 public class WPmask extends LinearLayout implements WPmask_eCountriesAdapter.OnSetCounty {
-    private Context context;
+    private final Context context;
     String PhoneNumber= "";
 
     public ImageView Flag;
-    private LinearLayout Delimetr;
+    public LinearLayout Delimetr;
     public EditText PhoneNumberView;
     public TextView PhoneCode;
     public String PhoneNumberValueBefore="";
 
-    private float scale;
+    public float scale;
     public static FrameLayout FrameMenuCountry;
-    private LinearLayout MenuCountry_bg;
-    private LinearLayout MenuCountry_box;
-    private LinearLayout MenuCountry_bottom;
-    private Button MenuCountry_bottom_button_close;
-    private RecyclerView MenuCountry_list;
-    private WPmask_eCountriesAdapter mWPmask_eCountriesAdapter;
-    private View rootView;
+    public LinearLayout MenuCountry_bg;
+    public LinearLayout MenuCountry_box;
+    public LinearLayout MenuCountry_bottom;
+    public Button MenuCountry_bottom_button_close;
+    public RecyclerView MenuCountry_list;
+    public WPmask_eCountriesAdapter mWPmask_eCountriesAdapter;
+    public View rootView;
     public final WPmask_eCountries wp_eCountries =new WPmask_eCountries("ua", "380", 12, "ua_flag", "Ukraine (Україна)", "XX XXX-XX-XX");
 
-    HashMap<String,String> PlaceHolders = new HashMap();
 
     public WPmask(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -62,13 +60,12 @@ public class WPmask extends LinearLayout implements WPmask_eCountriesAdapter.OnS
 
         this.scale = context.getResources().getDisplayMetrics().density;
         TypedArray attributes = context.obtainStyledAttributes(attrs, R.styleable.WPmask);
-        String CurrentCountry_tmp = attributes.getString(R.styleable.WPmask_country);
 
         String PhoneNumber_tmp="";
         try {
             PhoneNumber_tmp = attributes.getString(R.styleable.WPmask_phoneNumber);
         }finally {
-            //Log.v("###1",PhoneNumber_tmp);
+            Log.v("###","Phone Number is empty");
         }
 
         if (PhoneNumber_tmp != null) {
@@ -240,20 +237,15 @@ public class WPmask extends LinearLayout implements WPmask_eCountriesAdapter.OnS
     public  Boolean isValid(){
         return  (this.getNumber().length() == this.wp_eCountries.len) ? true :false;
     }
-    public String getCountryShortName(){
-        return wp_eCountries.shortName;
-    }
     public void UpdateElements(){
-        PhoneCode.setText("+"+wp_eCountries.code);
+        String pCode = "+"+wp_eCountries.code;
+        PhoneCode.setText(pCode);
         Flag.setImageBitmap(wp_eCountries.flagBitmap);
         FrameMenuCountry.setVisibility(GONE);
         PhoneNumberView.setHint(wp_eCountries.pattern);
         update(PhoneNumberView);
     }
-    public static Bitmap decodeBase64(String input) {
-        byte[] decodedByte = Base64.decode(input, 0);
-        return BitmapFactory.decodeByteArray(decodedByte, 0, decodedByte.length);
-    }
+
     public static Integer get_pixels(Context context,Integer dps){
         return  (int) (dps * context.getResources().getDisplayMetrics().density + 0.5f);
     }
@@ -269,7 +261,7 @@ public class WPmask extends LinearLayout implements WPmask_eCountriesAdapter.OnS
     public void update(final EditText view){
         view.clearFocus();
         String str = view.getText().toString().replaceAll("\\D","");
-        Integer k=0;
+        int k=0;
         if(PhoneNumberValueBefore.length() > view.getText().toString().length()){
             if(PhoneNumberValueBefore.replaceAll("\\D","").length() <= str.length()){
                 str = str.substring(0,str.length()-1);
@@ -277,7 +269,7 @@ public class WPmask extends LinearLayout implements WPmask_eCountriesAdapter.OnS
         }
 
         String res=""  ;
-        for(Integer i = 0; i< wp_eCountries.pattern.length(); i++){
+        for(int i = 0; i< wp_eCountries.pattern.length(); i++){
             if(wp_eCountries.pattern.charAt(i) == 'X'){
                 if(str.length() > k){
                     res += str.charAt(k);
@@ -302,7 +294,6 @@ class WPmask_eCountries{
     public String name;
     public String pattern;
     public Bitmap flagBitmap;
-    public String number;
 
     public WPmask_eCountries(String shortName, String code, Integer len, String imageStr, String name, String pattern){
         this.imageStr = imageStr;
@@ -361,16 +352,16 @@ class WPmask_eCountries{
 
 }
 class WPmask_eCountriesAdapter extends RecyclerView.Adapter<WPmask_eCountriesAdapter.RecViewHolder> {
-    private Context mContext;
-    private ArrayList<WPmask_eCountries> mCountries;
-    private String LogTag ="###";
-    private LinearLayout MenuCountry_item;
-    private LinearLayout MenuCountry_row;
-    private LinearLayout MenuCountry_border;
+    public Context mContext;
+    public ArrayList<WPmask_eCountries> mCountries;
+    //public String LogTag ="###";
+    public LinearLayout MenuCountry_item;
+    public LinearLayout MenuCountry_row;
+    public LinearLayout MenuCountry_border;
 
-    private ImageView MenuCountry_item_flag;
-    private TextView MenuCountry_item_code;
-    private TextView MenuCountry_item_country_name;
+    public ImageView MenuCountry_item_flag;
+    public TextView MenuCountry_item_code;
+    public TextView MenuCountry_item_country_name;
 
     public WPmask_eCountriesAdapter (Context context, ArrayList<WPmask_eCountries> countries){
         mContext = context;
@@ -419,7 +410,8 @@ class WPmask_eCountriesAdapter extends RecyclerView.Adapter<WPmask_eCountriesAda
     @Override
     public void onBindViewHolder(WPmask_eCountriesAdapter.RecViewHolder holder, final int i) {
         WPmask_eCountries country = mCountries.get(i);
-        holder.mCode.setText("+"+country.code);
+        String pCode = "+"+country.code;
+        holder.mCode.setText(pCode);
         holder.mCountry_name.setText(country.name);
         holder.mFlag.setImageBitmap(country.flagBitmap);
         holder.mitem.setOnClickListener(new View.OnClickListener() {
@@ -434,7 +426,7 @@ class WPmask_eCountriesAdapter extends RecyclerView.Adapter<WPmask_eCountriesAda
     public int getItemCount() {
         return mCountries.size();
     }
-    public class RecViewHolder extends RecyclerView.ViewHolder{
+    public static class RecViewHolder extends RecyclerView.ViewHolder{
         public TextView mCountry_name;
         public TextView mCode;
         public ImageView mFlag;
