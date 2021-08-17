@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <declare-styleable name="WPmask">
-        <attr name="country" format="string" />
+        <attr name="defaultCountry" format="string" />
         <attr name="phoneNumber" format="string" />
+        <attr name="PriorityCountries" format="string" />
+        <attr name="AcceptCountries" format="string" />
+
     </declare-styleable>
 </resources>
