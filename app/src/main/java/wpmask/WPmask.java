@@ -61,7 +61,7 @@ public class WPmask extends LinearLayout implements WPmask_eCountriesAdapter.OnS
 
     public AlertDialog countriesDialog;
     public final WPmask_eCountries wp_eCountries;
-
+    Boolean allowMask = true;
     public WPmask(Context context, AttributeSet attrs) {
         super(context, attrs);
         this.context=context;
@@ -176,15 +176,12 @@ public class WPmask extends LinearLayout implements WPmask_eCountriesAdapter.OnS
 
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                //update();
-                PhoneNumberValueBefore = PhoneNumberView.getText().toString();
             }
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if(PhoneNumberView.isFocused()){
-                    update(PhoneNumberView);
-                }
+                textChanged();
+
             }
         });
 //        FrameMenuCountry.setVisibility(GONE);
@@ -226,7 +223,7 @@ public class WPmask extends LinearLayout implements WPmask_eCountriesAdapter.OnS
         MenuCountry_box.addView(MenuCountry_border_delimeter);
         MenuCountry_box.addView(MenuCountry_bottom);
         if(Number.length() > 0){
-            update(PhoneNumberView);
+            textChanged();
         }
 
 
@@ -269,7 +266,7 @@ public class WPmask extends LinearLayout implements WPmask_eCountriesAdapter.OnS
         Flag.setImageDrawable(wp_eCountries.getCountryDrawable(null));
         PhoneNumberView.setHint(wp_eCountries.pattern);
         countriesDialog.dismiss();
-        update(PhoneNumberView);
+        textChanged();
     }
 
     void hideKeyboard() {
@@ -290,33 +287,53 @@ public class WPmask extends LinearLayout implements WPmask_eCountriesAdapter.OnS
         }
         this.UpdateElements();
     }
-    public void update(final EditText view){
-        view.clearFocus();
-        String str = view.getText().toString().replaceAll("\\D","");
-        int k=0;
-        if(PhoneNumberValueBefore.length() > view.getText().toString().length()){
-            if(PhoneNumberValueBefore.replaceAll("\\D","").length() <= str.length()){
-                str = str.substring(0,str.length()-1);
-            }
+    public void textChanged(){
+        if (allowMask == false){
+            allowMask = true;
+            return;
         }
 
-        StringBuilder myString = new StringBuilder();
-        for(int i = 0; i< wp_eCountries.pattern.length(); i++){
-            if(wp_eCountries.pattern.charAt(i) == 'X'){
-                if(str.length() > k){
-                    myString.append(str.charAt(k));
-                    k++;
-                }else{
-                    break;
+        if (PhoneNumberView.getText().length() < 1){
+            return;
+
+        }
+        char[] textChars = PhoneNumberView.getText().toString().toCharArray();
+        if (textChars[textChars.length - 1] == ' ' || textChars[textChars.length - 1] == '-'){
+            return;
+        }
+
+        ArrayList<String> ints = new ArrayList<>();
+        ArrayList<String> intFromField = new ArrayList<>();
+
+        for (int i = 0; i < 10; i++) {
+            ints.add(i + "");
+        }
+        for (int i = 0; i < textChars.length; i++){
+            for (int y = 0; y < ints.size(); y++){
+                if ((textChars[i] + "").equals(ints.get(y))){
+                    intFromField.add(ints.get(y));
                 }
-            }else{
-                myString.append(wp_eCountries.pattern.charAt(i));
+
             }
         }
-        String res = myString.toString();
-        view.setText(res);
-        view.requestFocus();
-        view.setSelection(res.length());
+        char[] maskChars = wp_eCountries.pattern.toCharArray();
+        int indexInt = 0;
+        String returnedString = "";
+        for (int i = 0; i < maskChars.length; i++) {
+            if (indexInt >= intFromField.size()){
+                break;
+            }
+            if (maskChars[i] == 'X'){
+                returnedString += intFromField.get(indexInt);
+                indexInt += 1;
+            }else{
+                returnedString += maskChars[i];
+            }
+        }
+        allowMask = false;
+        PhoneNumberView.setText(returnedString);
+        PhoneNumberView.setSelection(returnedString.length());
+
     }
 }
 
