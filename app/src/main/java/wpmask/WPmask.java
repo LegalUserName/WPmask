@@ -1,6 +1,7 @@
 package wpmask;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
@@ -47,8 +48,8 @@ public class WPmask extends LinearLayout implements WPmask_eCountriesAdapter.OnS
     public TextView PhoneCode;
     public String PhoneNumberValueBefore="";
     public float scale;
-    public FrameLayout FrameMenuCountry;
-    public LinearLayout MenuCountry_bg;
+//    public FrameLayout FrameMenuCountry;
+//    public LinearLayout MenuCountry_bg;
     public LinearLayout MenuCountry_box;
     public LinearLayout MenuCountry_bottom;
     public TextView MenuCountry_bottom_button_close;
@@ -56,13 +57,15 @@ public class WPmask extends LinearLayout implements WPmask_eCountriesAdapter.OnS
     public LinearLayout MenuCountry_border_delimeter;
     public WPmask_eCountriesAdapter mWPmask_eCountriesAdapter;
 
-    public View rootView;
+//    public View rootView;
+
+    public AlertDialog countriesDialog;
     public final WPmask_eCountries wp_eCountries;
 
     public WPmask(Context context, AttributeSet attrs) {
         super(context, attrs);
         this.context=context;
-        rootView = ((Activity)context). getWindow().getDecorView().getRootView();
+//        rootView = ((Activity)context). getWindow().getDecorView().getRootView();
 
 
         this.scale = context.getResources().getDisplayMetrics().density;
@@ -115,8 +118,6 @@ public class WPmask extends LinearLayout implements WPmask_eCountriesAdapter.OnS
         Delimetr = new LinearLayout(this.context);
         PhoneNumberView = new EditText(this.context);
         PhoneCode = new TextView(this.context);
-        FrameMenuCountry = new FrameLayout(this.context);
-        MenuCountry_bg = new LinearLayout(this.context);
         MenuCountry_box = new LinearLayout(this.context);
         MenuCountry_list = new RecyclerView(this.context);
         MenuCountry_bottom = new LinearLayout(this.context);
@@ -142,7 +143,6 @@ public class WPmask extends LinearLayout implements WPmask_eCountriesAdapter.OnS
         PhoneCode.setLayoutParams(PhoneCodeParams);
         PhoneCode.setGravity(Gravity.CENTER | Gravity.START);
         PhoneNumberView.setGravity(Gravity.CENTER);
-        FrameMenuCountry.setLayoutParams(MenuCountryParams);
         if(Number.length() >0 ){
             PhoneNumberView.setText(Number);
         }else {
@@ -158,18 +158,16 @@ public class WPmask extends LinearLayout implements WPmask_eCountriesAdapter.OnS
         this.addView(PhoneCode);
         this.addView(Delimetr);
         this.addView(PhoneNumberView);
-        FrameMenuCountry.setOnClickListener(v -> FrameMenuCountry.setVisibility(GONE));
         PhoneCode.setOnClickListener(v -> {
-            FrameMenuCountry.setVisibility(VISIBLE);
-            InputMethodManager imm = (InputMethodManager) context.getSystemService(Activity.INPUT_METHOD_SERVICE);
-            imm.hideSoftInputFromWindow(PhoneCode.getWindowToken(), 0);
+            countriesDialog.show();
+            hideKeyboard();
         });
         Flag.setOnClickListener(v -> {
-            InputMethodManager imm = (InputMethodManager) context.getSystemService(Activity.INPUT_METHOD_SERVICE);
-            imm.hideSoftInputFromWindow(Flag.getWindowToken(), 0);
-            FrameMenuCountry.setVisibility(VISIBLE);
+            countriesDialog.show();
+            hideKeyboard();
+
         });
-        MenuCountry_bottom_button_close.setOnClickListener(v -> FrameMenuCountry.setVisibility(GONE));
+        MenuCountry_bottom_button_close.setOnClickListener(v -> countriesDialog.dismiss());
 
         PhoneNumberView.addTextChangedListener(new TextWatcher() {
             @Override
@@ -189,12 +187,12 @@ public class WPmask extends LinearLayout implements WPmask_eCountriesAdapter.OnS
                 }
             }
         });
-        FrameMenuCountry.setVisibility(GONE);
+//        FrameMenuCountry.setVisibility(GONE);
         MenuCountry_boxParams.setMargins(get_pixels(this.context,40),0,get_pixels(this.context,40),0);
-        MenuCountry_bg.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
-        MenuCountry_bg.setBackgroundColor(Color.BLACK);
-        MenuCountry_bg.setGravity(Gravity.CENTER_VERTICAL);
-        MenuCountry_bg.setAlpha(0.8f);
+//        MenuCountry_bg.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+//        MenuCountry_bg.setBackgroundColor(Color.BLACK);
+//        MenuCountry_bg.setGravity(Gravity.CENTER_VERTICAL);
+//        MenuCountry_bg.setAlpha(0.8f);
         MenuCountry_boxParams.setMargins(get_pixels(this.context,40),get_pixels(this.context,150),get_pixels(this.context,40),get_pixels(this.context,150));
 
         MenuCountry_box.setLayoutParams(MenuCountry_boxParams);
@@ -220,9 +218,12 @@ public class WPmask extends LinearLayout implements WPmask_eCountriesAdapter.OnS
         MenuCountry_bottom_button_close.setBackgroundColor(Color.WHITE);
         MenuCountry_bottom.addView(MenuCountry_bottom_button_close);
 
-        ((ViewGroup) rootView).addView(FrameMenuCountry);
-        FrameMenuCountry.addView(MenuCountry_bg);
-        FrameMenuCountry.addView(MenuCountry_box);
+//        ((ViewGroup) rootView).addView(FrameMenuCountry);
+//        FrameMenuCountry.addView(MenuCountry_bg);
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+
+        countriesDialog.setView(MenuCountry_box);
+        countriesDialog = builder.create();
 
         MenuCountry_box.addView(MenuCountry_list);
         MenuCountry_box.addView(MenuCountry_border_delimeter);
@@ -262,11 +263,15 @@ public class WPmask extends LinearLayout implements WPmask_eCountriesAdapter.OnS
         String pCode = "+"+wp_eCountries.code;
         PhoneCode.setText(pCode);
         Flag.setImageDrawable(wp_eCountries.getCountryDrawable(null));
-        FrameMenuCountry.setVisibility(GONE);
         PhoneNumberView.setHint(wp_eCountries.pattern);
+        countriesDialog.dismiss();
         update(PhoneNumberView);
     }
 
+    void hideKeyboard() {
+        InputMethodManager imm = (InputMethodManager) context.getSystemService(Activity.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(PhoneCode.getWindowToken(), 0);
+    }
     public static Integer get_pixels(Context context,Integer dps){
         return  (int) (dps * context.getResources().getDisplayMetrics().density + 0.5f);
     }
