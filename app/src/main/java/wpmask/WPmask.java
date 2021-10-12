@@ -220,10 +220,7 @@ public class WPmask extends LinearLayout implements WPmask_eCountriesAdapter.OnS
 
 //        ((ViewGroup) rootView).addView(FrameMenuCountry);
 //        FrameMenuCountry.addView(MenuCountry_bg);
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
 
-        countriesDialog.setView(MenuCountry_box);
-        countriesDialog = builder.create();
 
         MenuCountry_box.addView(MenuCountry_list);
         MenuCountry_box.addView(MenuCountry_border_delimeter);
@@ -231,6 +228,13 @@ public class WPmask extends LinearLayout implements WPmask_eCountriesAdapter.OnS
         if(Number.length() > 0){
             update(PhoneNumberView);
         }
+
+
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+
+        builder.setView(MenuCountry_box);
+        countriesDialog = builder.create();
     }
 
     public boolean InitNumber(String number){
