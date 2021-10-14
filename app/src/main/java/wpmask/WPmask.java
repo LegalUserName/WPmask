@@ -97,17 +97,10 @@ public class WPmask extends LinearLayout implements WPmask_eCountriesAdapter.OnS
         mWPmask_eCountriesAdapter.Register_onSetCounty(this);
 
         attributes.recycle();
+        CreateElements("");
 
         if (PhoneNumber_tmp != null) {
-            PhoneNumber = PhoneNumber_tmp;
-            Log.v("###",PhoneNumber);
-            if(InitNumber(PhoneNumber)){
-                CreateElements(PhoneNumber.substring(wp_eCountries.code.length()+1,PhoneNumber.length()));
-            }else{
-                CreateElements("");
-            }
-        }else {
-            CreateElements("");
+            InitNumber(PhoneNumber_tmp);
         }
     }
 
@@ -234,7 +227,7 @@ public class WPmask extends LinearLayout implements WPmask_eCountriesAdapter.OnS
         countriesDialog = builder.create();
     }
 
-    public boolean InitNumber(String number){
+    public void InitNumber(String number){
 
         wp_eCountries.setCountry("ua");
         UpdateElements();
@@ -268,21 +261,7 @@ public class WPmask extends LinearLayout implements WPmask_eCountriesAdapter.OnS
         } catch (JSONException exception) {
             exception.printStackTrace();
         }
-        Boolean result = false;
-        number = number.replaceAll("\\D","");
-        for (int i=0; i < wp_eCountries.countries.length(); i++) {
-            try {
-                JSONObject CountryTmp = wp_eCountries.countries.getJSONObject(i);
-                if(number.substring(0,CountryTmp.getString("code").length()).equals(CountryTmp.getString("code"))){
-                    wp_eCountries.setCountry(CountryTmp.getString("shortName"));
-                    result = true;
-                    break;
-                }
-            }catch (JSONException e){
-                Log.v("###",e.getMessage().toString());
-            }
-        }
-        return  result;
+
     }
     public  String getNumber(){
         return wp_eCountries.code+PhoneNumberView.getText().toString().replaceAll("\\D","");
