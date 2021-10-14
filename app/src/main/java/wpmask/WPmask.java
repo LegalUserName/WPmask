@@ -235,6 +235,39 @@ public class WPmask extends LinearLayout implements WPmask_eCountriesAdapter.OnS
     }
 
     public boolean InitNumber(String number){
+
+        wp_eCountries.setCountry("ua");
+        UpdateElements();
+        try {
+
+        for (int i = 0; i < wp_eCountries.countries.length(); i++) {
+                if (number.length() < wp_eCountries.countries.getJSONObject(i).getString("code").length()){
+                    break;
+                }
+
+            ArrayList<String> phoneArr = new ArrayList<>();
+            for (int y = 0; y < number.toCharArray().length; y++){
+                phoneArr.add(number.toCharArray()[y] + "");
+            }
+            String code = "";
+            for (int y = 0; y < wp_eCountries.countries.getJSONObject(i).getString("code").length(); y++){
+                code += phoneArr.get(y);
+            }
+            if (code.equals(wp_eCountries.countries.getJSONObject(i).getString("code"))){
+                wp_eCountries.setCountry(wp_eCountries.countries.getJSONObject(i).getString("short_name"));
+                String strForPhone = "";
+                for (int y = wp_eCountries.countries.getJSONObject(i).getString("code").length(); y < phoneArr.size(); y++){
+                    strForPhone += phoneArr.get(y);
+                }
+                allowMask = true;
+                PhoneNumberView.setText(strForPhone);
+                UpdateElements();
+            }
+
+        }
+        } catch (JSONException exception) {
+            exception.printStackTrace();
+        }
         Boolean result = false;
         number = number.replaceAll("\\D","");
         for (int i=0; i < wp_eCountries.countries.length(); i++) {
