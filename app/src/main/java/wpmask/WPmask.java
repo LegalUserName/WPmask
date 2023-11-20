@@ -369,6 +369,7 @@ class WPmask_eCountries {
         this.context=context;
         try {
             JSONArray countries_tmp = new JSONArray("[" +
+                    "{\"shortName\":\"de\",\"code\":\"49\",\"len\":13,\"name\":\"Germany (Deutschland)\",\"pattern\":\"XXXX XXX-XXXX\"}," +
                     "{\"shortName\":\"bl\",\"code\":\"375\",\"len\":12,\"name\":\"Belarus (Беларусь)\",\"pattern\":\"XX XXX-XX-XX\"}," +
                     "{\"shortName\":\"ee\",\"code\":\"372\",\"len\":10,\"name\":\"Estonia (Eesti)\",\"pattern\":\"XXX-XX-XX\"}," +
                     "{\"shortName\":\"int\",\"code\":\"88239\",\"len\":15,\"name\":\"International Networks\",\"pattern\":\"XXX XXX-XX-XX\"}," +
@@ -455,8 +456,9 @@ class WPmask_eCountries {
         }
         switch (shortName){
             case "ua":
-//                return getDrawable(context.getResources().getDrawable(R.drawable.wpmask_ua));
                 return context.getResources().getDrawable(R.drawable.wpmask_ua);
+            case "de":
+                return context.getResources().getDrawable(R.drawable.wpmask_de);
             case "bl":
                 return context.getResources().getDrawable(R.drawable.wpmask_bl);
             case "ee":
